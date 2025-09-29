@@ -1,0 +1,836 @@
+//Ques - 28
+
+<?php
+if (
+    (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') 
+    || $_SERVER['SERVER_PORT'] == 443
+) {
+    echo "The page is accessed over HTTPS.";
+} else {
+    echo "The page is accessed over HTTP.";
+}
+?>
+
+---------------------------------------
+
+//Quest - 29
+//FRONTEND
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PHP AJAX Example</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #response {
+      margin-top: 15px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      min-height: 30px;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>PHP AJAX Application</h2>
+  <button id="fetchBtn">Get Message from Server</button>
+
+  <div id="response">Server response will appear here...</div>
+
+  <script>
+    document.getElementById("fetchBtn").addEventListener("click", function() {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", "server.php", true);
+
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          document.getElementById("response").innerHTML = xhr.responseText;
+        } else {
+          document.getElementById("response").innerHTML = "Error fetching data.";
+        }
+      };
+
+      xhr.send();
+    });
+  </script>
+</body>
+</html>
+
+//BACKEND
+
+<?php
+$messages = [
+    "Hello! This is a response from the PHP server.",
+    "AJAX makes the page load faster!",
+    "PHP + AJAX = 🚀",
+    "You just fetched this without reloading the page!"
+];
+
+// Pick a random message
+echo $messages[array_rand($messages)];
+?>
+
+-------------------------------------
+
+//QUES - 24
+
+<?php
+$servername = "localhost";
+$username   = "root";        
+$password   = "";
+
+$conn = new mysqli($servername, $username, $password);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$sql = "CREATE DATABASE myDatabase";
+
+if ($conn->query($sql) === TRUE) {
+    echo "Database created successfully";
+} else {
+    echo "Error creating database: " . $conn->error;
+}
+
+$conn->close();
+?>
+
+-------------------------------
+
+//QUES - 25
+
+<?php
+$servername = "localhost";
+$username   = "root";       
+$password   = "";          
+$dbname     = "myDatabase"; 
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$sql = "CREATE TABLE IF NOT EXISTS students (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(50) NOT NULL,
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+$conn->query($sql);
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name  = $conn->real_escape_string($_POST['name']);
+    $email = $conn->real_escape_string($_POST['email']);
+
+    $sql = "INSERT INTO students (name, email) VALUES ('$name', '$email')";
+    if ($conn->query($sql) === TRUE) {
+        echo "<p style='color:green;'>Record inserted successfully ✅</p>";
+    } else {
+        echo "<p style='color:red;'>Error: " . $conn->error . "</p>";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Insert Records using PHP Form</title>
+</head>
+<body>
+    <h2>Student Registration Form</h2>
+
+    <form method="post" action="">
+        <label>Name:</label>
+        <input type="text" name="name" required><br><br>
+
+        <label>Email:</label>
+        <input type="email" name="email" required><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <hr>
+    <h3>Stored Records</h3>
+    <?php
+    $result = $conn->query("SELECT id, name, email, reg_date FROM students");
+
+    if ($result->num_rows > 0) {
+        echo "<table border='1' cellpadding='8'>
+                <tr><th>ID</th><th>Name</th><th>Email</th><th>Registered</th></tr>";
+        while($row = $result->fetch_assoc()) {
+            echo "<tr>
+                    <td>".$row["id"]."</td>
+                    <td>".$row["name"]."</td>
+                    <td>".$row["email"]."</td>
+                    <td>".$row["reg_date"]."</td>
+                  </tr>";
+        }
+        echo "</table>";
+    } else {
+        echo "No records found.";
+    }
+
+    $conn->close();
+    ?>
+</body>
+</html>
+
+------------------------------------
+
+//QUES - 26
+
+<?php
+$servername = "localhost";
+$username   = "root";       
+$password   = "";           
+$dbname     = "myDatabase"; 
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$sql = "SELECT id, name, email, reg_date FROM students";
+$result = $conn->query($sql);
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Display Student Records</title>
+</head>
+<body>
+    <h2>All Student Records</h2>
+
+    <?php
+    if ($result->num_rows > 0) {
+        echo "<table border='1' cellpadding='8'>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Registered</th>
+                </tr>";
+        while ($row = $result->fetch_assoc()) {
+            echo "<tr>
+                    <td>".$row["id"]."</td>
+                    <td>".$row["name"]."</td>
+                    <td>".$row["email"]."</td>
+                    <td>".$row["reg_date"]."</td>
+                  </tr>";
+        }
+        echo "</table>";
+    } else {
+        echo "No records found.";
+    }
+
+    $conn->close();
+    ?>
+</body>
+</html>
+
+----------------------------------------
+
+//QUES - 27
+
+<?php
+$servername = "localhost";
+$username   = "root";       
+$password   = "";            
+$dbname     = "myDatabase";  
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+echo "<h2>Modify Table Demo (students)</h2>";
+
+$sql = "ALTER TABLE students ADD age INT(3)";
+if ($conn->query($sql) === TRUE) {
+    echo "Column 'age' added successfully.<br>";
+} else {
+    echo "Error adding column: " . $conn->error . "<br>";
+}
+
+$sql = "ALTER TABLE students MODIFY name VARCHAR(100)";
+if ($conn->query($sql) === TRUE) {
+    echo "Column 'name' modified successfully.<br>";
+} else {
+    echo "Error modifying column: " . $conn->error . "<br>";
+}
+
+$sql = "ALTER TABLE students DROP COLUMN age";
+if ($conn->query($sql) === TRUE) {
+    echo "Column 'age' deleted successfully.<br>";
+} else {
+    echo "Error deleting column: " . $conn->error . "<br>";
+}
+
+$conn->close();
+?>
+
+----------------------------------------
+
+//QUES - 16
+
+//LOGIN
+
+<?php
+session_start();
+
+$admin_username = "admin";
+$admin_password = "12345"; // change as needed
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    if ($username === $admin_username && $password === $admin_password) {
+        // Set session variable
+        $_SESSION['admin_logged_in'] = true;
+        $_SESSION['admin_username'] = $username;
+        header("Location: dashboard.php");
+        exit();
+    } else {
+        $error = "Invalid username or password!";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login</title>
+</head>
+<body>
+    <h2>Admin Login</h2>
+    <?php if(!empty($error)) echo "<p style='color:red;'>$error</p>"; ?>
+    <form method="post" action="">
+        <label>Username:</label>
+        <input type="text" name="username" required><br><br>
+
+        <label>Password:</label>
+        <input type="password" name="password" required><br><br>
+
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
+
+//DASHBOARD 
+
+<?php
+session_start();
+
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header("Location: login.php");
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h2>Welcome, <?php echo $_SESSION['admin_username']; ?>!</h2>
+    <p>This is the admin dashboard.</p>
+
+    <a href="logout.php">Logout</a>
+</body>
+</html>
+
+//LOGOUT
+
+<?php
+session_start();
+session_destroy();
+
+header("Location: login.php");
+exit();
+?>
+
+----------------------------------------
+
+//QUES - 18
+
+<?php
+$dir = "demo_folder";
+$file = "demo_file.txt";
+
+// Create a directory if it doesn't exist
+if (!is_dir($dir)) {
+    mkdir($dir);
+    echo "Directory '$dir' created.<br>";
+} else {
+    echo "Directory '$dir' already exists.<br>";
+}
+
+// Create a new file
+$filePath = $dir . "/" . $file;
+if (!file_exists($filePath)) {
+    file_put_contents($filePath, "Hello! This is the first line.\n");
+    echo "File '$file' created and initial content written.<br>";
+} else {
+    echo "File '$file' already exists.<br>";
+}
+
+// Read file content
+echo "<h4>File Content:</h4>";
+$content = file_get_contents($filePath);
+echo "<pre>$content</pre>";
+
+// Append content to the file
+file_put_contents($filePath, "This is the second line.\n", FILE_APPEND);
+echo "Content appended to file.<br>";
+
+// Read updated content
+echo "<h4>Updated File Content:</h4>";
+echo "<pre>" . file_get_contents($filePath) . "</pre>";
+
+// Rename the file
+$newFilePath = $dir . "/demo_file_renamed.txt";
+rename($filePath, $newFilePath);
+echo "File renamed to 'demo_file_renamed.txt'.<br>";
+
+// List all files in the directory
+echo "<h4>Files in directory '$dir':</h4>";
+$files = scandir($dir);
+echo "<pre>";
+print_r(array_diff($files, array('.', '..')));
+echo "</pre>";
+
+// Delete the file
+unlink($newFilePath);
+echo "File deleted.<br>";
+
+// Remove the directory
+rmdir($dir);
+echo "Directory deleted.<br>";
+?>
+
+-------------------------------------------------
+
+//QUES - 22 
+
+<?php
+$message = "";
+$uploadedImage = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+
+        $targetDir = "uploads/";
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0777, true);
+        }
+
+        $fileName = basename($_FILES['image']['name']);
+        $targetFilePath = $targetDir . $fileName;
+
+        $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+        $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+
+        if (in_array($fileType, $allowedTypes)) {
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFilePath)) {
+                $message = "Image uploaded successfully ✅";
+                $uploadedImage = $targetFilePath;
+            } else {
+                $message = "Error uploading image ❌";
+            }
+        } else {
+            $message = "Only JPG, JPEG, PNG, GIF files are allowed ❌";
+        }
+
+    } else {
+        $message = "Please select an image to upload ❌";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload and Display Image</title>
+</head>
+<body>
+    <h2>Upload Image Form</h2>
+
+    <?php if($message) echo "<p>$message</p>"; ?>
+
+    <form method="post" action="" enctype="multipart/form-data">
+        <label>Select Image:</label>
+        <input type="file" name="image" accept="image/*" required><br><br>
+        <button type="submit">Upload</button>
+    </form>
+
+    <?php if($uploadedImage): ?>
+        <h3>Uploaded Image:</h3>
+        <img src="<?php echo $uploadedImage; ?>" alt="Uploaded Image" style="max-width:400px;">
+    <?php endif; ?>
+</body>
+</html>
+
+------------------------------------------
+
+//QUES - 23
+
+<?php
+$servername = "localhost";
+$username   = "root";       
+$password   = "";           
+$dbname     = "myDatabase"; 
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+echo "<h2>PHP MySQL Operations</h2>";
+
+// Import SQL file
+$sqlFile = "import_file.sql"; // Your SQL file path
+if (file_exists($sqlFile)) {
+    $sql = file_get_contents($sqlFile);
+    if ($conn->multi_query($sql)) {
+        do {
+            /* store first result set */
+            if ($result = $conn->store_result()) {
+                $result->free();
+            }
+        } while ($conn->next_result());
+        echo "SQL file imported successfully.<br>";
+    } else {
+        echo "Error importing SQL file: " . $conn->error . "<br>";
+    }
+} else {
+    echo "SQL file not found.<br>";
+}
+
+// Review data (SELECT)
+$sql = "SELECT * FROM students"; // Example table
+$result = $conn->query($sql);
+if ($result->num_rows > 0) {
+    echo "<h3>Student Records:</h3><table border='1' cellpadding='5'>
+          <tr><th>ID</th><th>Name</th><th>Email</th><th>Registered</th></tr>";
+    while ($row = $result->fetch_assoc()) {
+        echo "<tr>
+                <td>".$row['id']."</td>
+                <td>".$row['name']."</td>
+                <td>".$row['email']."</td>
+                <td>".$row['reg_date']."</td>
+              </tr>";
+    }
+    echo "</table>";
+} else {
+    echo "No records found.<br>";
+}
+
+// Review table structure
+$sql = "DESCRIBE students";
+$result = $conn->query($sql);
+if ($result->num_rows > 0) {
+    echo "<h3>Table Structure:</h3><table border='1' cellpadding='5'>
+          <tr><th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th></tr>";
+    while ($row = $result->fetch_assoc()) {
+        echo "<tr>
+                <td>".$row['Field']."</td>
+                <td>".$row['Type']."</td>
+                <td>".$row['Null']."</td>
+                <td>".$row['Key']."</td>
+                <td>".$row['Default']."</td>
+                <td>".$row['Extra']."</td>
+              </tr>";
+    }
+    echo "</table>";
+}
+
+// Run example SQL statements
+$conn->query("INSERT INTO students (name, email) VALUES ('Test User', 'test@example.com')");
+$conn->query("UPDATE students SET email='updated@example.com' WHERE name='Test User'");
+$conn->query("DELETE FROM students WHERE name='Test User'");
+echo "Example SQL statements executed (Insert, Update, Delete).<br>";
+
+// Create users and privileges
+$newUser = "testuser";
+$newPass = "password123";
+$conn->query("CREATE USER IF NOT EXISTS '$newUser'@'localhost' IDENTIFIED BY '$newPass'");
+$conn->query("GRANT ALL PRIVILEGES ON $dbname.* TO '$newUser'@'localhost'");
+$conn->query("FLUSH PRIVILEGES");
+echo "User '$newUser' created with privileges on '$dbname'.<br>";
+
+$conn->close();
+?>
+
+---------------------------------------
+
+//QUES - 14 
+
+<?php
+$name = $email = $age = $gender = $address = "";
+$nameErr = $emailErr = $ageErr = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    
+    if (empty($_POST["name"])) {
+        $nameErr = "Name is required";
+    } else {
+        $name = htmlspecialchars($_POST["name"]);
+    }
+
+    if (empty($_POST["email"])) {
+        $emailErr = "Email is required";
+    } else {
+        $email = htmlspecialchars($_POST["email"]);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $emailErr = "Invalid email format";
+        }
+    }
+
+    if (empty($_POST["age"])) {
+        $ageErr = "Age is required";
+    } else {
+        $age = (int)$_POST["age"];
+        if ($age <= 0) {
+            $ageErr = "Invalid age";
+        }
+    }
+
+    $gender = isset($_POST["gender"]) ? $_POST["gender"] : "";
+    $address = htmlspecialchars($_POST["address"]);
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Personal Information Form</title>
+    <style>
+        .error { color:red; }
+    </style>
+</head>
+<body>
+    <h2>Personal Information Form</h2>
+    <form method="post" action="">
+        <label>Name:</label>
+        <input type="text" name="name" value="<?php echo $name; ?>">
+        <span class="error">* <?php echo $nameErr; ?></span><br><br>
+
+        <label>Email:</label>
+        <input type="text" name="email" value="<?php echo $email; ?>">
+        <span class="error">* <?php echo $emailErr; ?></span><br><br>
+
+        <label>Age:</label>
+        <input type="number" name="age" value="<?php echo $age; ?>">
+        <span class="error">* <?php echo $ageErr; ?></span><br><br>
+
+        <label>Gender:</label>
+        <input type="radio" name="gender" value="Male" <?php if($gender=="Male") echo "checked"; ?>> Male
+        <input type="radio" name="gender" value="Female" <?php if($gender=="Female") echo "checked"; ?>> Female
+        <input type="radio" name="gender" value="Other" <?php if($gender=="Other") echo "checked"; ?>> Other<br><br>
+
+        <label>Address:</label><br>
+        <textarea name="address" rows="4" cols="50"><?php echo $address; ?></textarea><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <?php if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($nameErr) && empty($emailErr) && empty($ageErr)): ?>
+        <hr>
+        <h3>Submitted Information:</h3>
+        <p><strong>Name:</strong> <?php echo $name; ?></p>
+        <p><strong>Email:</strong> <?php echo $email; ?></p>
+        <p><strong>Age:</strong> <?php echo $age; ?></p>
+        <p><strong>Gender:</strong> <?php echo $gender; ?></p>
+        <p><strong>Address:</strong> <?php echo $address; ?></p>
+    <?php endif; ?>
+</body>
+</html>
+
+---------------------------------------
+
+//QUES - 11
+
+<?php
+$cookie_name = "user";
+$cookie_value = "Rishi Singh";
+setcookie($cookie_name, $cookie_value, time() + 3600, "/");
+
+// setcookie($cookie_name, "", time() - 3600, "/"); // Uncomment to delete
+
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PHP Cookie Demo</title>
+</head>
+<body>
+    <h2>PHP Cookie Example</h2>
+
+    <?php
+    if(isset($_COOKIE[$cookie_name])) {
+        echo "Welcome back! User: " . $_COOKIE[$cookie_name];
+    } else {
+        echo "Cookie named '$cookie_name' is not set!";
+    }
+    ?>
+
+    <p>Refresh the page to see that the cookie persists.</p>
+</body>
+</html>
+
+--------------------------------
+
+//QUES - 9 
+
+//three fine banegi
+
+//1 - header.php
+
+<?php
+echo "<h2>Welcome to My Website (Header)</h2>";
+?>
+
+//2 - main.php
+
+<?php
+echo "<h1>Main Page</h1>";
+
+// Include header.php
+include 'header.php';
+echo "<p>This is content after including header.php</p>";
+
+// Require footer.php
+require 'footer.php';
+echo "<p>This is content after requiring footer.php</p>";
+
+// Using exit
+if (isset($_GET['stop']) && $_GET['stop'] == 1) {
+    echo "<p>Execution stopped using exit()</p>";
+    exit(); // stops script execution
+}
+
+// Using die
+if (isset($_GET['die']) && $_GET['die'] == 1) {
+    die("<p>Execution stopped using die()</p>");
+}
+
+echo "<p>This is the last line of the script.</p>";
+?>
+
+//3 - footer.php
+
+<?php
+echo "<footer><p>Footer Section of the Website</p></footer>";
+?>
+
+-----------------------------------------
+
+//QUES - 7
+
+<?php
+echo "<h2>PHP Array Functions Demo</h2>";
+
+$fruits = ["Apple", "Banana", "Mango"];
+echo "<h3>Original Array:</h3>";
+foreach ($fruits as $f) {
+    echo $f . " ";
+}
+echo "<hr>";
+
+// array_pad() → pad array to given length with a value
+$padded = array_pad($fruits, 6, "Orange");
+echo "<h3>array_pad() - Pad to 6 elements with 'Orange':</h3>";
+foreach ($padded as $p) {
+    echo $p . " ";
+}
+echo "<hr>";
+
+// array_slice()
+$sliced = array_slice($fruits, 1, 2);
+echo "<h3>array_slice() - From index 1, take 2 elements:</h3>";
+foreach ($sliced as $s) {
+    echo $s . " ";
+}
+echo "<hr>";
+
+// array_splice()
+$moreFruits = ["Apple", "Banana", "Mango", "Grapes", "Pineapple"];
+array_splice($moreFruits, 2, 2, ["Kiwi", "Peach"]); 
+echo "<h3>array_splice() - Replace 2 elements starting from index 2:</h3>";
+foreach ($moreFruits as $m) {
+    echo $m . " ";
+}
+echo "<hr>";
+
+// list()
+$person = ["John", "Doe", 25];
+list($fname, $lname, $age) = $person;
+echo "<h3>list() - Assign array values to variables:</h3>";
+echo "First Name: $fname <br>";
+echo "Last Name: $lname <br>";
+echo "Age: $age <br>";
+?>
+
+--------------------------------------
+
+//QUES - 6
+
+<?php
+echo "<h2>PHP Array Sorting Demo</h2>";
+
+// Indexed Array
+$numbers = [5, 2, 9, 1, 7];
+echo "<h3>Original Array:</h3>";
+foreach ($numbers as $num) { echo $num . " "; }
+echo "<hr>";
+
+// Ascending sort
+sort($numbers); // sort values ascending
+echo "<h3>Ascending Sort (sort):</h3>";
+foreach ($numbers as $num) { echo $num . " "; }
+echo "<hr>";
+
+// Descending sort
+rsort($numbers); // sort values descending
+echo "<h3>Descending Sort (rsort):</h3>";
+foreach ($numbers as $num) { echo $num . " "; }
+echo "<hr>";
+
+// Associative Array
+$fruits = ["c" => "Mango", "a" => "Apple", "b" => "Banana"];
+echo "<h3>Original Associative Array:</h3>";
+foreach ($fruits as $key => $value) { echo "$key => $value <br>"; }
+echo "<hr>";
+
+// Sort by values
+asort($fruits);
+echo "<h3>Sort by Values Ascending (asort):</h3>";
+foreach ($fruits as $key => $value) { echo "$key => $value <br>"; }
+echo "<hr>";
+
+// Sort by keys
+ksort($fruits);
+echo "<h3>Sort by Keys Ascending (ksort):</h3>";
+foreach ($fruits as $key => $value) { echo "$key => $value <br>"; }
+echo "<hr>";
+?>
+
+---------------------------------------------------

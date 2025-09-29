@@ -71,7 +71,7 @@ if (
 $messages = [
     "Hello! This is a response from the PHP server.",
     "AJAX makes the page load faster!",
-    "PHP + AJAX = 🚀",
+    "PHP + AJAX",
     "You just fetched this without reloading the page!"
 ];
 
@@ -135,7 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $sql = "INSERT INTO students (name, email) VALUES ('$name', '$email')";
     if ($conn->query($sql) === TRUE) {
-        echo "<p style='color:green;'>Record inserted successfully ✅</p>";
+        echo "<p style='color:green;'>Record inserted successfully</p>";
     } else {
         echo "<p style='color:red;'>Error: " . $conn->error . "</p>";
     }
@@ -448,17 +448,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (in_array($fileType, $allowedTypes)) {
             if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFilePath)) {
-                $message = "Image uploaded successfully ✅";
+                $message = "Image uploaded successfully";
                 $uploadedImage = $targetFilePath;
             } else {
-                $message = "Error uploading image ❌";
+                $message = "Error uploading image";
             }
         } else {
-            $message = "Only JPG, JPEG, PNG, GIF files are allowed ❌";
+            $message = "Only JPG, JPEG, PNG, GIF files are allowed";
         }
 
     } else {
-        $message = "Please select an image to upload ❌";
+        $message = "Please select an image to upload";
     }
 }
 ?>

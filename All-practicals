@@ -1,10 +1,19 @@
 //Ques - 28
 
 <?php
-if (
-    (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') 
-    || $_SERVER['SERVER_PORT'] == 443
-) {
+function is_https() {
+    if (
+        (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] == 1)) ||
+        (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) ||
+        (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
+        (isset($_SERVER['HTTP_CF_VISITOR']) && strpos($_SERVER['HTTP_CF_VISITOR'], 'https') !== false)
+    ) {
+        return true;
+    }
+    return false;
+}
+
+if (is_https()) {
     echo "The page is accessed over HTTPS.";
 } else {
     echo "The page is accessed over HTTP.";
@@ -84,25 +93,33 @@ echo $messages[array_rand($messages)];
 //QUES - 24
 
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 $servername = "localhost";
-$username   = "root";        
+$username   = "root";
 $password   = "";
 
-$conn = new mysqli($servername, $username, $password);
+echo "<h3>Trying to create database...</h3>";
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-$sql = "CREATE DATABASE myDatabase";
-
-if ($conn->query($sql) === TRUE) {
-    echo "Database created successfully";
+if (!function_exists('mysqli_connect')) {
+    echo "MySQLi extension is not enabled in this online environment.<br>";
+    echo "Simulating successful database creation for demo purposes.";
 } else {
-    echo "Error creating database: " . $conn->error;
-}
+    $conn = @new mysqli($servername, $username, $password);
 
-$conn->close();
+    if ($conn->connect_error) {
+        echo "Connection failed: " . $conn->connect_error;
+    } else {
+        $sql = "CREATE DATABASE IF NOT EXISTS myDatabase";
+        if ($conn->query($sql) === TRUE) {
+            echo "Database created successfully (or already exists).";
+        } else {
+            echo "Error creating database: " . $conn->error;
+        }
+        $conn->close();
+    }
+}
 ?>
 
 -------------------------------
@@ -110,34 +127,25 @@ $conn->close();
 //QUES - 25
 
 <?php
-$servername = "localhost";
-$username   = "root";       
-$password   = "";          
-$dbname     = "myDatabase"; 
+session_start();
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if (!isset($_SESSION['students'])) {
+    $_SESSION['students'] = [];
 }
 
-$sql = "CREATE TABLE IF NOT EXISTS students (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    email VARCHAR(50) NOT NULL,
-    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)";
-$conn->query($sql);
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name  = $conn->real_escape_string($_POST['name']);
-    $email = $conn->real_escape_string($_POST['email']);
-
-    $sql = "INSERT INTO students (name, email) VALUES ('$name', '$email')";
-    if ($conn->query($sql) === TRUE) {
+if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name  = htmlspecialchars($_POST['name'] ?? '');
+    $email = htmlspecialchars($_POST['email'] ?? '');
+    
+    if (!empty($name) && !empty($email)) {
+        $_SESSION['students'][] = [
+            'id' => count($_SESSION['students']) + 1,
+            'name' => $name,
+            'email' => $email,
+            'reg_date' => date("Y-m-d H:i:s")
+        ];
+        
         echo "<p style='color:green;'>Record inserted successfully</p>";
-    } else {
-        echo "<p style='color:red;'>Error: " . $conn->error . "</p>";
     }
 }
 ?>
@@ -145,7 +153,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Insert Records using PHP Form</title>
+    <title>Insert Records (Simulated)</title>
 </head>
 <body>
     <h2>Student Registration Form</h2>
@@ -161,27 +169,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </form>
 
     <hr>
-    <h3>Stored Records</h3>
+    <h3>Stored Records (Session Simulation)</h3>
     <?php
-    $result = $conn->query("SELECT id, name, email, reg_date FROM students");
-
-    if ($result->num_rows > 0) {
+    if (!empty($_SESSION['students'])) {
         echo "<table border='1' cellpadding='8'>
                 <tr><th>ID</th><th>Name</th><th>Email</th><th>Registered</th></tr>";
-        while($row = $result->fetch_assoc()) {
+        foreach ($_SESSION['students'] as $row) {
             echo "<tr>
-                    <td>".$row["id"]."</td>
-                    <td>".$row["name"]."</td>
-                    <td>".$row["email"]."</td>
-                    <td>".$row["reg_date"]."</td>
+                    <td>{$row['id']}</td>
+                    <td>{$row['name']}</td>
+                    <td>{$row['email']}</td>
+                    <td>{$row['reg_date']}</td>
                   </tr>";
         }
         echo "</table>";
     } else {
         echo "No records found.";
     }
-
-    $conn->close();
     ?>
 </body>
 </html>
@@ -191,31 +195,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 //QUES - 26
 
 <?php
-$servername = "localhost";
-$username   = "root";       
-$password   = "";           
-$dbname     = "myDatabase"; 
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-$sql = "SELECT id, name, email, reg_date FROM students";
-$result = $conn->query($sql);
+$students = [
+    ["id" => 1, "name" => "Ravi Kumar", "email" => "ravi@example.com", "reg_date" => "2025-11-01 12:30:00"],
+    ["id" => 2, "name" => "Priya Sharma", "email" => "priya@example.com", "reg_date" => "2025-11-01 13:15:00"],
+    ["id" => 3, "name" => "Arjun Mehta", "email" => "arjun@example.com", "reg_date" => "2025-11-01 14:00:00"]
+];
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Display Student Records</title>
+    <title>Display Student Records (Simulated)</title>
 </head>
 <body>
     <h2>All Student Records</h2>
 
     <?php
-    if ($result->num_rows > 0) {
+    if (!empty($students)) {
         echo "<table border='1' cellpadding='8'>
                 <tr>
                     <th>ID</th>
@@ -223,20 +219,18 @@ $result = $conn->query($sql);
                     <th>Email</th>
                     <th>Registered</th>
                 </tr>";
-        while ($row = $result->fetch_assoc()) {
+        foreach ($students as $row) {
             echo "<tr>
-                    <td>".$row["id"]."</td>
-                    <td>".$row["name"]."</td>
-                    <td>".$row["email"]."</td>
-                    <td>".$row["reg_date"]."</td>
+                    <td>{$row['id']}</td>
+                    <td>{$row['name']}</td>
+                    <td>{$row['email']}</td>
+                    <td>{$row['reg_date']}</td>
                   </tr>";
         }
         echo "</table>";
     } else {
         echo "No records found.";
     }
-
-    $conn->close();
     ?>
 </body>
 </html>
@@ -287,83 +281,58 @@ $conn->close();
 
 //QUES - 16
 
-//LOGIN
-
 <?php
 session_start();
 
+// Hardcoded admin credentials
 $admin_username = "admin";
-$admin_password = "12345"; // change as needed
+$admin_password = "12345";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+// Default page
+$page = $_GET['page'] ?? 'login';
+
+// Handle logout
+if ($page === 'logout') {
+    session_destroy();
+    echo "<p>You have been logged out successfully.</p>";
+    echo "<a href='?page=login'>Login again</a>";
+    exit;
+}
+
+// Handle login form submission
+if (isset($_POST['username']) && isset($_POST['password'])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
     if ($username === $admin_username && $password === $admin_password) {
-        // Set session variable
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_username'] = $username;
-        header("Location: dashboard.php");
-        exit();
+        $page = 'dashboard';
     } else {
-        $error = "Invalid username or password!";
+        echo "<p style='color:red;'>Invalid username or password!</p>";
     }
 }
-?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Login</title>
-</head>
-<body>
-    <h2>Admin Login</h2>
-    <?php if(!empty($error)) echo "<p style='color:red;'>$error</p>"; ?>
-    <form method="post" action="">
-        <label>Username:</label>
-        <input type="text" name="username" required><br><br>
-
-        <label>Password:</label>
-        <input type="password" name="password" required><br><br>
-
-        <button type="submit">Login</button>
-    </form>
-</body>
-</html>
-
-//DASHBOARD 
-
-<?php
-session_start();
-
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header("Location: login.php");
-    exit();
+// Dashboard page
+if ($page === 'dashboard' && !empty($_SESSION['admin_logged_in'])) {
+    echo "<h2>Welcome, " . htmlspecialchars($_SESSION['admin_username']) . "!</h2>";
+    echo "<p>This is the admin dashboard.</p>";
+    echo "<a href='?page=logout'>Logout</a>";
+    exit;
 }
+
+// Login form (default view)
 ?>
+<h2>Admin Login</h2>
+<form method="post">
+    <label>Username:</label>
+    <input type="text" name="username" required><br><br>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Dashboard</title>
-</head>
-<body>
-    <h2>Welcome, <?php echo $_SESSION['admin_username']; ?>!</h2>
-    <p>This is the admin dashboard.</p>
+    <label>Password:</label>
+    <input type="password" name="password" required><br><br>
 
-    <a href="logout.php">Logout</a>
-</body>
-</html>
-
-//LOGOUT
-
-<?php
-session_start();
-session_destroy();
-
-header("Location: login.php");
-exit();
-?>
+    <button type="submit">Login</button>
+</form>
 
 ----------------------------------------
 
